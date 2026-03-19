@@ -17,8 +17,9 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
-        return PostResource::collection(Post::all());
+        return PostResource::collection(Post::with('user')->paginate());
+        //return PostResource::collection(Post::with('user')->get());
+        //return PostResource::collection(Post::all());
     }
 
     /**
@@ -34,8 +35,10 @@ class PostController extends Controller
 
         $post = Post::create($inputvalues);
 
-        return response()->json($post,201);
-
+        //return response()->json($post,201);
+        return (new PostResource($post))
+        ->response()
+        ->setStatusCode(201);
         //return $request->only('title');
         //return $request->all();
         /*
@@ -63,7 +66,10 @@ class PostController extends Controller
         ;*/
         //$post = Post::findorFail($id);
 
-        return response()->json($post);
+        //return response()->json($post);
+        return (new PostResource($post))
+        ->response()
+        ->setStatusCode(200);
     }
 
     /**

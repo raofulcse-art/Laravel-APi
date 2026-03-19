@@ -7,6 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PostResource extends JsonResource
 {
+    //public static $wrap = null;
     /**
      * Transform the resource into an array.
      *
@@ -19,7 +20,8 @@ class PostResource extends JsonResource
             'title' => $this->title,
             'body' => $this->body,
             'created_at' => $this->created_at->format('Y-m-d H:1:s'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:1:s')
+            'updated_at' => $this->updated_at->format('Y-m-d H:1:s'),
+            'user' => new UserResource($this->whenLoaded('user'))
         ];
     }
 }
