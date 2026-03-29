@@ -9,6 +9,8 @@ use App\Http\Requests\StorePostRequest;
 
 use Illuminate\Http\Resource;
 use App\Http\Resources\PostResource;
+use Illuminate\Container\Attributes\Auth;
+
 
 class PostController extends Controller
 {
@@ -17,7 +19,10 @@ class PostController extends Controller
      */
     public function index()
     {
-        return PostResource::collection(Post::with('user')->paginate());
+        $user = request()->user();
+        $posts = $user->posts()->with('user')->paginate();
+        return PostResource::collection($posts);
+        //return PostResource::collection(Post::with('user')->paginate());
         //return PostResource::collection(Post::with('user')->get());
         //return PostResource::collection(Post::all());
     }
@@ -31,7 +36,7 @@ class PostController extends Controller
         $inputvalues = $request->validated();
         $inputvalues['title'] = strip_tags($inputvalues['title']);
         $inputvalues['body'] = strip_tags($inputvalues['body']);
-        $inputvalues['user_id'] = 1;
+        $inputvalues['user_id'] = request()->user()->id;
 
         $post = Post::create($inputvalues);
 
@@ -67,9 +72,12 @@ class PostController extends Controller
         //$post = Post::findorFail($id);
 
         //return response()->json($post);
+        $user = request()->user();
+        abort_if($user->id != $post->user_id,403,"Access Forbidden");
         return (new PostResource($post))
         ->response()
         ->setStatusCode(200);
+
     }
 
     /**
@@ -78,6 +86,8 @@ class PostController extends Controller
     public function update(Request $request, Post $post)
     {
         //
+        $user = request()->user();
+        abort_if($user->id != $post->user_id,403,"Access Forbidden");
         $inputvalues = $request->validate([
             'title' => ['required' , 'min:5'],
             'body' => ['required']
